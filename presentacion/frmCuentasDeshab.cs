@@ -13,11 +13,23 @@ namespace BancoTransacc.presentacion
 {
     public partial class frmCuentasDeshab : Form
     {
-        dbHelper oDBHelper;
-        public frmCuentasDeshab()
+        dbHelperConexion oDBHelper;
+        
+        private static frmCuentasDeshab instancia = null;
+
+        public static frmCuentasDeshab obtenerInstancia()
+        {
+            if(instancia == null)
+            {
+                instancia = new frmCuentasDeshab();
+            }
+            return instancia;
+        }
+        
+        private frmCuentasDeshab()
         {
             InitializeComponent();
-            oDBHelper = new dbHelper();
+            oDBHelper = new dbHelperConexion();
         }
 
         private void frmCuentasDeshab_Load(object sender, EventArgs e)
@@ -29,7 +41,7 @@ namespace BancoTransacc.presentacion
 
         private void cargarGrillaDesh()
         {
-            DataTable tabla = oDBHelper.consultarDB("GrillaDeshab");
+            DataTable tabla = dbHelperDao.obtenerInstancia().consultarDB("GrillaDeshab");
             grillaDeshab.DataSource = tabla;
         }
 
@@ -75,7 +87,7 @@ namespace BancoTransacc.presentacion
                == DialogResult.Yes)
             {
                 int cbuCuenta = Convert.ToInt32(txtCBUCuenta.Text);
-                oDBHelper.elimCuenta("AltaLog", cbuCuenta);
+                dbHelperDao.obtenerInstancia().habilitarCuenta("AltaLog", cbuCuenta);
                 MessageBox.Show("Cuenta habilitada");
                 cargarGrillaDesh();
                 limpiar();

@@ -31,32 +31,37 @@ namespace BancoTransacc
 
         private void clienteToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            frmCliente fnc = new frmCliente();
-            fnc.ShowDialog();
+            frmCliente fnc = frmCliente.obtenerInstancia();
+            fnc.Show();
+            fnc.Show();
         }
 
         private void cuentasDeshabilitadasToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            frmCuentasDeshab fcd = new frmCuentasDeshab();
-            fcd.ShowDialog();
+            frmCuentasDeshab fcd = frmCuentasDeshab.obtenerInstancia();
+            fcd.Show();
+            fcd.Focus();
         }
 
         private void saldosToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            frmReporte fmr = new frmReporte();
-            fmr.ShowDialog();
+            frmReporte fmr = frmReporte.obtenerInstancia();
+            fmr.Show();
+            fmr.Focus();
         }
 
         private void clientesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            frmReportClientes frc = new frmReportClientes();
-            frc.ShowDialog();
+            frmReportClientes frc = frmReportClientes.obtenerInstancia();
+            frc.Show();
+            frc.Focus();
         }
 
         private void todosLosClientesToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            frmClienteGral fcg = new frmClienteGral();
-            fcg.ShowDialog();
+            frmClienteGral fcg = frmClienteGral.obtenerInstancia();
+            fcg.Show();
+            fcg.Focus();
         }
     }
 }

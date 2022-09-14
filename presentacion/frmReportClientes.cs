@@ -12,7 +12,18 @@ namespace BancoTransacc.presentacion
 {
     public partial class frmReportClientes : Form
     {
-        public frmReportClientes()
+        private static frmReportClientes instancia = null;
+
+        public static frmReportClientes obtenerInstancia()
+        {
+            if(instancia == null)
+            {
+                instancia = new frmReportClientes();
+            }
+            return instancia;
+        }
+        
+        private frmReportClientes()
         {
             InitializeComponent();
         }

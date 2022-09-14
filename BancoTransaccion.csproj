@@ -64,7 +64,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="acceso\dbHelper.cs" />
+    <Compile Include="acceso\dbHelperConexion.cs" />
+    <Compile Include="acceso\dbHelperDao.cs" />
     <Compile Include="bancoDataSet.Designer.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
@@ -80,8 +81,8 @@
       <DesignTime>True</DesignTime>
       <DependentUpon>bancoDataSet2.xsd</DependentUpon>
     </Compile>
-    <Compile Include="dominio\cliente.cs" />
-    <Compile Include="dominio\cuenta.cs" />
+    <Compile Include="dominio\clienteDTO.cs" />
+    <Compile Include="dominio\cuentaDTO.cs" />
     <Compile Include="presentacion\frmClienteGral.cs">
       <SubType>Form</SubType>
     </Compile>
@@ -130,6 +131,7 @@
     <Compile Include="presentacion\frmCliente.Designer.cs">
       <DependentUpon>frmCliente.cs</DependentUpon>
     </Compile>
+    <Compile Include="dominio\Interface1.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SqlServerTypes\Loader.cs" />

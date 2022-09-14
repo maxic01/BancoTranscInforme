@@ -1,4 +1,6 @@
 ﻿using BancoTransacc.acceso;
+using BancoTransacc.dominio;
+using BancoTransacc.presentacion;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -13,12 +15,24 @@ namespace BancoTransacc
 {
     public partial class frmCliente : Form
     {
-        dbHelper oDBHelper;
+        clienteDTO oCliente;
+        cuentaDTO oCuenta;
 
-        public frmCliente()
+        private static frmCliente instancia = null;
+        public static frmCliente obtenerInstancia()
+        {
+            if(instancia == null)
+            {
+                instancia = new frmCliente();
+            }
+            return instancia;
+        }
+
+        private frmCliente()
         {
             InitializeComponent();
-            oDBHelper = new dbHelper();
+            oCliente = new clienteDTO();
+            oCuenta = new cuentaDTO();
         }
 
         private void frmCliente_Load(object sender, EventArgs e)
@@ -34,12 +48,12 @@ namespace BancoTransacc
         #region select
         private void cargarGrillaCliente()
         {
-            DataTable tabla = oDBHelper.consultarDB("Grilla");
+            DataTable tabla = dbHelperDao.obtenerInstancia().consultarDB("Grilla");
             dataGridView1.DataSource = tabla;
         }
         private void cargarCombo()
         {
-            DataTable tabla = oDBHelper.consultarDB("Combo");
+            DataTable tabla = dbHelperDao.obtenerInstancia().consultarDB("Combo");
             cboTipo.DataSource = tabla;
             cboTipo.DisplayMember = "tipo";
             cboTipo.ValueMember = "cod_cuenta";
@@ -47,7 +61,7 @@ namespace BancoTransacc
         }
         private void cargarGrillaCuenta()
         {
-            DataTable tabla = oDBHelper.consultarDB("GrillaCuenta");
+            DataTable tabla = dbHelperDao.obtenerInstancia().consultarDB("GrillaCuenta");
             grillaCuenta.DataSource = tabla;
         }
         #endregion
@@ -64,6 +78,7 @@ namespace BancoTransacc
             txtCBU.Text = string.Empty;
             txtDNI.Text = string.Empty;
             dtpUltimoMov.Value = DateTime.Today;
+            txtDniCliente.Text = string.Empty;
 
         }
         private void habilitar(bool v)
@@ -98,7 +113,6 @@ namespace BancoTransacc
             btnCancelar.Enabled = v;
             btnEditClient.Enabled = !v;
             btnEditCuent.Enabled = !v;
-            btnInhabilitar.Enabled = !v;
             txtCBU2.Enabled = v;
             txtSaldo.Enabled = v;
             cboTipo.Enabled = v;
@@ -113,7 +127,6 @@ namespace BancoTransacc
         }
         private void editarCuenta(bool v)
         {
-            btnInhabilitar.Enabled = v;
             btnNuevoClient.Enabled = !v;
             btnEditClient.Enabled = !v;
             btnCancelar.Enabled = v;
@@ -122,14 +135,13 @@ namespace BancoTransacc
             btnActualizarCuent.Enabled = v;
             txtCBUCuenta.Enabled = v;
             txtSaldo.Enabled = v;
-            cboTipo.Enabled = v;
+            cboTipo.Enabled = !v;
             dtpUltimoMov.Enabled = v;
             grillaCuenta.Enabled = v;
             btnSalir.Enabled = !v;
         }
         private void editarCliente(bool v)
         {
-            btnInhabilitar.Enabled= !v;
             btnCancelar.Enabled = v;
             btnNuevoClient.Enabled = !v;
             btnEditClient.Enabled = !v;
@@ -257,15 +269,15 @@ namespace BancoTransacc
         {
             if (validarCliente() && validarCuenta())
             {
-                int cbuCuenta = Convert.ToInt32(txtCBU2.Text);
-                int saldo = Convert.ToInt32(txtSaldo.Text);
-                int tipoCuenta = Convert.ToInt32(cboTipo.SelectedValue);
-                DateTime ultimoMovimiento = dtpUltimoMov.Value;
-                int dni = Convert.ToInt32(txtDNI.Text);
-                string nombre = txtNombre.Text;
-                string apellido = txtApellido.Text;
-                int cbuCliente = Convert.ToInt32(txtCBU.Text);
-                if (oDBHelper.altaCliente("AddCuenta", "AddCliente", cbuCuenta, saldo, tipoCuenta, ultimoMovimiento, dni, nombre, apellido, cbuCliente))
+                oCuenta.CbuCuenta = Convert.ToInt32(txtCBU2.Text);
+                oCuenta.Saldo = Convert.ToInt32(txtSaldo.Text);
+                oCuenta.TipoCuenta = Convert.ToInt32(cboTipo.SelectedValue);
+                oCuenta.UltimoMovimiento = dtpUltimoMov.Value;
+                oCliente.Dni = Convert.ToInt32(txtDNI.Text);
+                oCliente.Nombre = txtNombre.Text;
+                oCliente.Apellido = txtApellido.Text;
+                oCliente.Cbu = Convert.ToInt32(txtCBU.Text);
+                if (dbHelperDao.obtenerInstancia().altaCliente("AddCuenta", "AddCliente", oCuenta, oCliente))
                 {
                     MessageBox.Show("cliente agregado");
                     cargarGrillaCuenta();
@@ -282,10 +294,10 @@ namespace BancoTransacc
         }
         private void btnActualizarClient_Click(object sender, EventArgs e)
         {
-            int dni = Convert.ToInt32(txtDniCliente.Text);
-            string nombre = txtNombre.Text;
-            string apellido = txtApellido.Text;
-            oDBHelper.editCliente("ActCliente", dni, nombre, apellido);
+            oCliente.Dni = Convert.ToInt32(txtDniCliente.Text);
+            oCliente.Nombre = txtNombre.Text;
+            oCliente.Apellido = txtApellido.Text;
+            dbHelperDao.obtenerInstancia().editCliente("ActCliente", oCliente);
             MessageBox.Show("Cliente actualizado");
             cargarGrillaCliente();
             limpiar();
@@ -301,8 +313,8 @@ namespace BancoTransacc
                 , MessageBoxDefaultButton.Button2)
                 == DialogResult.Yes)
             {
-                int dni = Convert.ToInt32(txtDniCliente.Text);
-                if (oDBHelper.elimCliente("EliminarCliente", dni))
+                oCliente.Dni = Convert.ToInt32(txtDniCliente.Text);
+                if (dbHelperDao.obtenerInstancia().elimCliente("EliminarCliente", oCliente))
                 {
                     MessageBox.Show("Cliente elimnado");
                     cargarGrillaCliente();
@@ -319,10 +331,10 @@ namespace BancoTransacc
         }
         private void btnActualizarCuent_Click(object sender, EventArgs e)
         {
-            int cbuCuenta = Convert.ToInt32(txtCBUCuenta.Text);
-            int saldo = Convert.ToInt32(txtSaldo.Text);
-            DateTime ultimoMovimiento = dtpUltimoMov.Value;
-            oDBHelper.editCuenta("ActCuenta", cbuCuenta, saldo, ultimoMovimiento);
+            oCuenta.CbuCuenta = Convert.ToInt32(txtCBUCuenta.Text);
+            oCuenta.Saldo = Convert.ToInt32(txtSaldo.Text);
+            oCuenta.UltimoMovimiento = dtpUltimoMov.Value;
+            dbHelperDao.obtenerInstancia().editCuenta("ActCuenta", oCuenta);
             MessageBox.Show("Cuenta actualizada");
             cargarGrillaCuenta();
             limpiar();
@@ -338,8 +350,8 @@ namespace BancoTransacc
                , MessageBoxDefaultButton.Button2)
                == DialogResult.Yes)
             {
-                int cbuCuenta = Convert.ToInt32(txtCBUCuenta.Text);
-                if (oDBHelper.elimCuenta("EliminarCuent", cbuCuenta))
+                oCuenta.CbuCuenta = Convert.ToInt32(txtCBUCuenta.Text);
+                if (dbHelperDao.obtenerInstancia().elimCuenta("EliminarCuent", oCuenta))
                 {
                     MessageBox.Show("Cuenta eliminada");
                     cargarGrillaCuenta();
@@ -363,8 +375,8 @@ namespace BancoTransacc
                , MessageBoxDefaultButton.Button2)
                == DialogResult.Yes)
             {
-                int cbuCuenta = Convert.ToInt32(txtCBUCuenta.Text);
-                oDBHelper.elimCuenta("BajaLog", cbuCuenta);
+                oCuenta.CbuCuenta = Convert.ToInt32(txtCBUCuenta.Text);
+                dbHelperDao.obtenerInstancia().elimCuenta("BajaLog", oCuenta);
                 MessageBox.Show("Cuenta deshabilitada");
                 cargarGrillaCuenta();
                 limpiar();
@@ -410,8 +422,9 @@ namespace BancoTransacc
               == DialogResult.Yes)
                 Close();
         }
+
         #endregion
 
-       
+
     }
 }

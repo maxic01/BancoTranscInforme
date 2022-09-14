@@ -6,30 +6,21 @@ using System.Threading.Tasks;
 using System.Data;
 using System.Data.SqlClient;
 using BancoTransacc.dominio;
+using BancoTransacc.presentacion;
 
 namespace BancoTransacc.acceso
 {
-    internal class dbHelper
+    internal class dbHelperDao : dbHelperConexion, Interface1
     {
-        SqlConnection conexion;
-        SqlCommand comando;
-        
+        private static dbHelperDao instancia;
 
-        public dbHelper()
+        public static dbHelperDao obtenerInstancia()
         {
-            conexion = new SqlConnection(Properties.Resources.cnnString);
-            comando = new SqlCommand();
+            if (instancia == null)
+                instancia = new dbHelperDao();
+            return instancia;
         }
-        private void conectar()
-        {
-            conexion.Open();
-            comando.Connection = conexion;
-            comando.CommandType = CommandType.StoredProcedure;
-        }
-        private void desconectar()
-        {
-            conexion.Close();
-        }
+
         public DataTable consultarDB(string SP)
         {
             conectar();
@@ -40,18 +31,18 @@ namespace BancoTransacc.acceso
             return tabla;
         }
         #region editar/eliminar cliente
-        public void editCliente(string SP, int dni, string nombre, string apellido)
+        public void editCliente(string SP, clienteDTO Cliente)
         {
             conectar();
             comando.CommandText = SP;
-            comando.Parameters.AddWithValue("@dni", SqlDbType.Int).Value = dni;
-            comando.Parameters.AddWithValue("@nombre", SqlDbType.NVarChar).Value = nombre;
-            comando.Parameters.AddWithValue("@apellido", SqlDbType.NVarChar).Value = apellido;
+            comando.Parameters.AddWithValue("@dni", SqlDbType.Int).Value = Cliente.Dni;
+            comando.Parameters.AddWithValue("@nombre", SqlDbType.NVarChar).Value = Cliente.Nombre;
+            comando.Parameters.AddWithValue("@apellido", SqlDbType.NVarChar).Value = Cliente.Apellido;
             comando.ExecuteNonQuery();
             comando.Parameters.Clear();
             desconectar();
         }
-        public bool elimCliente(string SP, int dni)
+        public bool elimCliente(string SP, clienteDTO Cliente)
         {
             bool ok = true;
             SqlTransaction t = null;
@@ -61,7 +52,7 @@ namespace BancoTransacc.acceso
                 t = conexion.BeginTransaction();
                 comando.Transaction = t;
                 comando.CommandText = SP;
-                comando.Parameters.AddWithValue("@dni", SqlDbType.Int).Value = dni;
+                comando.Parameters.AddWithValue("@dni", SqlDbType.Int).Value = Cliente.Dni;
                 comando.ExecuteNonQuery();
                 comando.Parameters.Clear();
                 t.Commit();
@@ -82,18 +73,18 @@ namespace BancoTransacc.acceso
         #endregion
 
         #region editar/eliminar cuenta
-        public void editCuenta(string SP, int cbuCuenta, int saldo, DateTime ultimoMovimiento)
+        public void editCuenta(string SP, cuentaDTO Cuenta)
         {
             conectar();
             comando.CommandText = SP;
-            comando.Parameters.AddWithValue("@cbu", SqlDbType.Int).Value = cbuCuenta;
-            comando.Parameters.AddWithValue("@saldo", SqlDbType.Money).Value = saldo;
-            comando.Parameters.AddWithValue("@ultimo_movimiento", SqlDbType.DateTime).Value = ultimoMovimiento;
+            comando.Parameters.AddWithValue("@cbu", SqlDbType.Int).Value = Cuenta.CbuCuenta;
+            comando.Parameters.AddWithValue("@saldo", SqlDbType.Money).Value = Cuenta.Saldo;
+            comando.Parameters.AddWithValue("@ultimo_movimiento", SqlDbType.DateTime).Value = Cuenta.UltimoMovimiento;
             comando.ExecuteNonQuery();
             comando.Parameters.Clear();
             desconectar();
         }
-        public bool elimCuenta(string SP, int cbuCuenta)
+        public bool elimCuenta(string SP, cuentaDTO Cuenta)
         {
             bool ok = true;
             SqlTransaction t = null;
@@ -103,7 +94,7 @@ namespace BancoTransacc.acceso
                 t = conexion.BeginTransaction();
                 comando.Transaction = t;
                 comando.CommandText = SP;
-                comando.Parameters.AddWithValue("@cbu", SqlDbType.Int).Value = cbuCuenta;
+                comando.Parameters.AddWithValue("@cbu", SqlDbType.Int).Value = Cuenta.CbuCuenta;
                 comando.ExecuteNonQuery();
                 comando.Parameters.Clear();
                 t.Commit();
@@ -122,11 +113,11 @@ namespace BancoTransacc.acceso
             return ok;
 
         }
-        public void inhabilitarCuenta(string SP, int cbuCuenta)
+        public void inhabilitarCuenta(string SP, cuentaDTO Cuenta)
         {
             conectar();
-            comando.CommandText= SP;
-            comando.Parameters.AddWithValue("@cbu", SqlDbType.Int).Value = cbuCuenta;
+            comando.CommandText = SP;
+            comando.Parameters.AddWithValue("@cbu", SqlDbType.Int).Value = Cuenta.CbuCuenta;
             comando.ExecuteNonQuery();
             comando.Parameters.Clear();
             desconectar();
@@ -141,8 +132,8 @@ namespace BancoTransacc.acceso
             desconectar();
         }
         #endregion
-        
-        public bool altaCliente(string InsertCuenta, string InsertCliente, int cbuCuenta, int saldo, int tipoCuenta, DateTime ultimoMovimiento, int dni, string nombre, string apellido, int cbuCliente)
+
+        public bool altaCliente(string InsertCuenta, string InsertCliente, cuentaDTO Cuenta, clienteDTO Cliente)
         {
             bool ok = true;
             SqlTransaction t = null;
@@ -152,17 +143,17 @@ namespace BancoTransacc.acceso
                 t = conexion.BeginTransaction();
                 comando.Transaction = t;
                 comando.CommandText = InsertCuenta;
-                comando.Parameters.AddWithValue("@cbu", SqlDbType.Int).Value = cbuCuenta;
-                comando.Parameters.AddWithValue("@saldo", SqlDbType.Money).Value = saldo;
-                comando.Parameters.AddWithValue("@cod_cuenta", SqlDbType.Int).Value = tipoCuenta;
-                comando.Parameters.AddWithValue("@ultimo_movimiento", SqlDbType.DateTime).Value = ultimoMovimiento;
+                comando.Parameters.AddWithValue("@cbu", SqlDbType.Int).Value = Cuenta.CbuCuenta;
+                comando.Parameters.AddWithValue("@saldo", SqlDbType.Money).Value = Cuenta.Saldo;
+                comando.Parameters.AddWithValue("@cod_cuenta", SqlDbType.Int).Value = Cuenta.TipoCuenta;
+                comando.Parameters.AddWithValue("@ultimo_movimiento", SqlDbType.DateTime).Value = Cuenta.UltimoMovimiento;
                 comando.ExecuteNonQuery();
                 comando.Parameters.Clear();
                 comando.CommandText = InsertCliente;
-                comando.Parameters.AddWithValue("@dni", SqlDbType.Int).Value = dni;
-                comando.Parameters.AddWithValue("@nombre", SqlDbType.NVarChar).Value = nombre;
-                comando.Parameters.AddWithValue("@apellido", SqlDbType.NVarChar).Value = apellido;
-                comando.Parameters.AddWithValue("@cbu", SqlDbType.Int).Value = cbuCliente;
+                comando.Parameters.AddWithValue("@dni", SqlDbType.Int).Value = Cliente.Dni;
+                comando.Parameters.AddWithValue("@nombre", SqlDbType.NVarChar).Value = Cliente.Nombre;
+                comando.Parameters.AddWithValue("@apellido", SqlDbType.NVarChar).Value = Cliente.Apellido;
+                comando.Parameters.AddWithValue("@cbu", SqlDbType.Int).Value = Cliente.Cbu;
                 comando.ExecuteNonQuery();
                 comando.Parameters.Clear();
                 t.Commit();
@@ -179,5 +170,6 @@ namespace BancoTransacc.acceso
             }
             return ok;
         }
+
     }
 }

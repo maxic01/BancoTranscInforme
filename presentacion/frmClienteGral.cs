@@ -12,7 +12,17 @@ namespace BancoTransacc.presentacion
 {
     public partial class frmClienteGral : Form
     {
-        public frmClienteGral()
+        private static frmClienteGral instancia = null;
+        
+        public static frmClienteGral obtenerInstancia()
+        {
+            if(instancia == null)
+            {
+                instancia = new frmClienteGral();
+            }
+            return instancia;
+        }
+        private frmClienteGral()
         {
             InitializeComponent();
         }
